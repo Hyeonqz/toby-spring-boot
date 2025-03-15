@@ -46,8 +46,57 @@ public record ExRateData(
 #### 관심사의 분리
 - 대표적인 리팩토링 --> 메소드 추출
 
+#### 상속을 통한 확장
+바뀔 수 있는 코드들은 제거를 한 후에 상속을 받아서 사용을 한다 <br>
+```java
+public abstract class PaymentService {
+	// 재사용성 높은 코드
+	public Payment prepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount) throws IOException {
+		BigDecimal krw = this.getExchangeRate(currency);
+		BigDecimal convertedAmount = foreignCurrencyAmount.multiply(krw);
+		LocalDateTime validUntil = LocalDateTime.now().plusMinutes(30);
 
+		return new Payment(orderId, currency, foreignCurrencyAmount, krw, convertedAmount, validUntil);
+	}
 
+	// 요구사항에 따라 바뀔 코드
+	abstract BigDecimal getExchangeRate(String currency) throws IOException;
+}
+
+public class WebApiExRatePaymentService extends PaymentService{
+
+	@Override
+	public BigDecimal getExchangeRate (String currency) throws IOException {
+		URL url = new URL("https://open.er-api.com/v6/latest/" + currency);
+		HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
+		BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+		String response = br.lines().collect(Collectors.joining());
+		br.close();
+
+		ObjectMapper mapper = new ObjectMapper();
+		ExRateData exRateData = mapper.readValue(response, ExRateData.class);
+
+		BigDecimal krw = exRateData.rates().get("KRW");
+		String result = exRateData.result();
+		return krw;
+	}
+
+}
+
+public class SimpleExRatePaymentService extends PaymentService{
+	private static final String USD = "USD";
+
+	@Override
+	BigDecimal getExchangeRate (String currency) throws IOException {
+		if(currency.equals(USD))
+			return BigDecimal.valueOf(1000);
+
+		throw new IllegalArgumentException("지원되지 않는 통화 입니다.");
+	}
+
+}
+
+```
 
 
 
