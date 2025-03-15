@@ -1,0 +1,4 @@
+### 환율 조회
+GET https://open.er-api.com/v6/latest/USD
+
+###
