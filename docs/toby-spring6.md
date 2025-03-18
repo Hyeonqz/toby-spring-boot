@@ -98,5 +98,102 @@ public class SimpleExRatePaymentService extends PaymentService{
 
 ```
 
+#### 클래스의 분리
+기존의 상속 구조로 코드를 짯을 때 만약 상위 구조가 변경이 된다면 하위 구조들 또한 변경이 일어나야 한다 <br>
+```java
+	private final WebApiExRateProvider exRateProvider;
+
+	public PaymentService () {
+		this.exRateProvider = new WebApiExRateProvider();
+	}
+```
+
+WebApiExRateProvider 가 변경이되면, 생성자 및 인스턴스 또한 수정이 되어야 한다 <br>
+
+위 문제를 해결하기 위해서는 상속이 아닌 '인터페이스' 를 활용해야 한다 <br>
+```java
+public interface ExRateProvider {
+	// 인터페이스는 기본적으로 메소드가 public 임
+
+	BigDecimal getExRate(String currency) throws IOException;
+
+}
+
+public class PaymentService {
+	// 한번만 만들어두고 재사용을 한다.
+	private final ExRateProvider exRateProvider;
+
+	public PaymentService () {
+		this.exRateProvider = new SimpleExRateProvider();
+	}
+
+	// 재사용성 높은 코드
+	public Payment prepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount) throws IOException {
+		BigDecimal exRate = exRateProvider.getExRate(currency);
+		BigDecimal convertedAmount = foreignCurrencyAmount.multiply(exRate);
+		LocalDateTime validUntil = LocalDateTime.now().plusMinutes(30);
+
+		return new Payment(orderId, currency, foreignCurrencyAmount, exRate, convertedAmount, validUntil);
+	}
+
+}
+```
+
+#### 관계 설정 책임의 분리
+런타임에 의존해야 할 코드 레벨에서 설정을 해야한다 <br>
+```java
+	public static void main (String[] args) throws IOException {
+		PaymentService paymentService = new PaymentService(new SimpleExRateProvider());
+		Payment payment = paymentService.prepare(100L, "USD", BigDecimal.valueOf(50.7));
+		System.out.println(payment.toString());
+	}
+
+public class PaymentService {
+	// 한번만 만들어두고 재사용을 한다.
+	private final ExRateProvider exRateProvider;
+
+	// 의존관계 설정 책임 -> 위 책임을 PaymentService 가 가지고 있음.
+	public PaymentService (ExRateProvider exRateProvider) {
+		this.exRateProvider = exRateProvider;
+	}
+}
+
+```
+
+#### 오브젝트 팩토리
+```java
+
+public class ObjectFactory {
+	public PaymentService paymentService () {
+		return new PaymentService(new SimpleExRateProvider());
+	}
+
+}
+
+public static void main (String[] args) throws IOException {
+	ObjectFactory objectFactory = new ObjectFactory();
+	PaymentService paymentService = objectFactory.paymentService();
+
+	Payment payment = paymentService.prepare(100L, "USD", BigDecimal.valueOf(50.7));
+	System.out.println(payment.toString());
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

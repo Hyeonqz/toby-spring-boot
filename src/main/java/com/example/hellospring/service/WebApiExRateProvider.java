@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import com.example.hellospring.domain.ExRateData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class WebApiExRatePaymentService extends PaymentService{
+public class WebApiExRateProvider implements ExRateProvider{
 
 	@Override
-	public BigDecimal getExchangeRate (String currency) throws IOException {
+	public BigDecimal getExRate (String currency) throws IOException {
 		URL url = new URL("https://open.er-api.com/v6/latest/" + currency);
 		HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
 		BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
@@ -24,9 +24,7 @@ public class WebApiExRatePaymentService extends PaymentService{
 		ObjectMapper mapper = new ObjectMapper();
 		ExRateData exRateData = mapper.readValue(response, ExRateData.class);
 
-		BigDecimal krw = exRateData.rates().get("KRW");
-		String result = exRateData.result();
-		return krw;
+		return exRateData.rates().get("KRW");
 	}
 
 }
