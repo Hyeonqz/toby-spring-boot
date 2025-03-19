@@ -180,13 +180,32 @@ public static void main (String[] args) throws IOException {
 
 ```
 
+#### 개방 폐쇄 원칙(OCP)
+클래스나 모듈은 확장에는 열려 있어야 하고 변경에는 닫혀 있어야 한다 <br>
+- 높은 응집도와 낮은 결합도 (High Coherence and low coupling)
+  - 응집도가 높다는 것은 하나의 모듈이 하나의 책임 또는 관심사에 집중되어있다는 뜻
+  - 변화가 일어날 때 해당 모듈에서 변하는 부분이 크다.
+  - 책임과 관심사가 다른 모듈과는 낮은 결합도, 즉 느슨하게 연결된 형태를 유지하는 것이 바람직하다
+- 전략 패턴(Strategy Pattern)
+  - 필요에 따라 변경이 필요한 알고리즘(=기능 수행 절차)를 인터페이스를 통해 통째로 외부로 분리시킴
+```java
+// 전략패턴 예시
+public class Sort {
+	public static void main (String[] args) {
+		List<Integer> scores = Arrays.asList(1,56,562,62,2,5,7);
+		// Collection.sort 는 전략 패턴으로 구현되어 있음.
+		Collections.sort(scores);
 
+		List<String> strings = Arrays.asList("Java","MySQL","asp","Spring");
+		Collections.sort(strings, (o1, o2) -> o1.length() - o2.length());
 
+		scores.forEach(System.out::println);
+		strings.forEach(System.out::println);
+	}
+}
+```
 
-
-
-
-
+- 제어의 역전 (프레임워크의 기본 동작 원리)
 
 
 
