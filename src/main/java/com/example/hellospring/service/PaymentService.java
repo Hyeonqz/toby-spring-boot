@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Component;
+
 import com.example.hellospring.domain.Payment;
 
+@Component
 public class PaymentService {
 	// 한번만 만들어두고 재사용을 한다.
 	private final ExRateProvider exRateProvider;

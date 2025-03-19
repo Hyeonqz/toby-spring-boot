@@ -8,9 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.example.hellospring.domain.ExRateData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Component
 public class WebApiExRateProvider implements ExRateProvider{
 
 	@Override
