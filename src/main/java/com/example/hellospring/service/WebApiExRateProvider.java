@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import com.example.hellospring.domain.ExRateData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class WebApiExRateProvider implements ExRateProvider{
 
@@ -26,6 +29,8 @@ public class WebApiExRateProvider implements ExRateProvider{
 
 		ObjectMapper mapper = new ObjectMapper();
 		ExRateData exRateData = mapper.readValue(response, ExRateData.class);
+
+		log.info("API ExRate : {}", exRateData.rates().get("KRW"));
 
 		return exRateData.rates().get("KRW");
 	}

@@ -1,21 +1,26 @@
 package com.example.hellospring.service;
 
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = "com.example.hellospring.*")
 public class ObjectFactory {
-	// 구성정보
+
+	// Java 코드로 된 구성정보
 	// 빈 클래스, 의존관계 정의
-/*	@Bean
+	@Bean
 	public PaymentService paymentService () {
-		return new PaymentService(exRateProvider());
+		return new PaymentService(cachedExRateProvider());
+	}
+
+	@Bean
+	public ExRateProvider cachedExRateProvider() {
+		return new CachedExRateProvider(exRateProvider());
 	}
 
 	@Bean
 	public ExRateProvider exRateProvider () {
-		return new SimpleExRateProvider();
-	}*/
+		return new WebApiExRateProvider();
+	}
 
 }
