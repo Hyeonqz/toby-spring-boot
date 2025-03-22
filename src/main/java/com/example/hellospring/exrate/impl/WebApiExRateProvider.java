@@ -1,4 +1,4 @@
-package com.example.hellospring.service;
+package com.example.hellospring.exrate.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,14 +10,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.example.hellospring.domain.ExRateData;
+import com.example.hellospring.exrate.ExRateData;
+import com.example.hellospring.payment.ExRateProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class WebApiExRateProvider implements ExRateProvider{
+public class WebApiExRateProvider implements ExRateProvider {
 
 	@Override
 	public BigDecimal getExRate (String currency) throws IOException {

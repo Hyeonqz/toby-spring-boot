@@ -1,8 +1,10 @@
-package com.example.hellospring.service;
+package com.example.hellospring.exrate.impl;
 
 import java.math.BigDecimal;
 
-public class SimpleExRateProvider implements ExRateProvider{
+import com.example.hellospring.payment.ExRateProvider;
+
+public class SimpleExRateProvider implements ExRateProvider {
 	private static final String USD = "USD";
 
 	@Override

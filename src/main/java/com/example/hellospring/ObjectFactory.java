@@ -1,7 +1,12 @@
-package com.example.hellospring.service;
+package com.example.hellospring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.example.hellospring.exrate.impl.CachedExRateProvider;
+import com.example.hellospring.exrate.impl.WebApiExRateProvider;
+import com.example.hellospring.payment.ExRateProvider;
+import com.example.hellospring.payment.PaymentService;
 
 @Configuration
 public class ObjectFactory {

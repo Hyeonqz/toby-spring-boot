@@ -1,12 +1,10 @@
-package com.example.hellospring.service;
+package com.example.hellospring.payment;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
-
-import com.example.hellospring.domain.Payment;
 
 @Component
 public class PaymentService {

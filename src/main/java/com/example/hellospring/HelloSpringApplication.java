@@ -7,9 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.example.hellospring.domain.Payment;
-import com.example.hellospring.service.ObjectFactory;
-import com.example.hellospring.service.PaymentService;
+import com.example.hellospring.payment.Payment;
+import com.example.hellospring.payment.PaymentService;
 
 //@SpringBootApplication
 public class HelloSpringApplication {
