@@ -268,8 +268,67 @@ BeanFactory(=스프링 컨테이너) -> 스프링 IoC/DI 컨테이너 <br>
 - 테스트 작성과 실행도 개발 과정의 일부이다.
 
 
+#### JUnit5
+- @Test 테스트 메소드
+- @BeforeEach 테스트
+  - 각 테스트 전에 실행된다.
+- 테스트 마다 새로운 인스턴스가 생성된다.
 
 
+List.of() -> 불변의 값을 가진 리스트 만듬 <br>
+Arrays.asList() -> 가변 방식의 리스트 만듬 <br>
 
+테스트는 다양한 측면에서 여러가지로 만들어보자 <br>
+```java
+	private Sort sort;
 
+	@BeforeEach
+	void beforeEach () {
+		sort = new Sort();
+	}
 
+	@Test
+	@DisplayName("BDD 스타일 테스트 => 길이 순으로 정렬을 한다")
+	void Sort_Length_Test() {
+	    // given	private Sort sort;
+
+      @BeforeEach
+      void beforeEach () {
+        sort = new Sort();
+      }
+
+      @Test
+      @DisplayName("BDD 스타일 테스트 => 길이 순으로 정렬을 한다")
+      void Sort_Length_Test() {
+        // given
+
+        // when
+        List<String> list = sort.sortByLength(Arrays.asList("aa", "b", "ccc"));
+
+        // then
+        Assertions.assertThat(list).isEqualTo(List.of("b","aa","ccc"));
+      }
+
+		// when
+		List<String> list = sort.sortByLength(Arrays.asList("aa", "b", "ccc"));
+
+	    // then
+		Assertions.assertThat(list).isEqualTo(List.of("b","aa","ccc"));
+	}
+```
+
+테스트는 가능하면 편하고 빠르게 작성하는 연습해야 한다 <br>
+```java
+	@BeforeEach
+	void beforeEach () {
+		sort = new Sort();
+		System.out.println(this);
+	}
+```
+
+테스트는 다른 테스트에 영향을 받지 않고 독립적으로 실행이 되어야 한다 <br>
+그러므로 테스트 실행 순서에 영향을 받아서는 안된다 <br>
+
+그걸 보장해주기 위해 테스트 메소드 1개당 테스트 인스턴스가 1개씩 생성이 된다 <br>
+즉 테스트 메소드 1개당 매번 테스트 인스턴스가 생성이 된다 <br>
+-> Junit5 기본적인 동작 방식이다 <br>
