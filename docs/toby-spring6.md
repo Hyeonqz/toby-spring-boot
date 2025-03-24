@@ -337,6 +337,132 @@ Arrays.asList() -> 가변 방식의 리스트 만듬 <br>
 - 예외를 통과하지 못해서
 - AssertThat 검증을 실패해서
 
+우리가 제어할 수 없는 외부시스템에 문제가 생기면? <br>
+
+#### 테스트의 구성 요소
+stub 을 활용하여 외부 호출을 테스트 한다 -> 테스트 협력자를 사용한다. <br>
+
+#### 테스트와 DI
+Stub = Test Double(대역) 을 알아보자 <br>
+
+BigDecimal 은 Assertions.assertThat() 의 isEqualByComparingTo() 메소드를 활용한다 <br>
+isEqualTo() 는 소수점 2자리 까지 비교 isEqualByComparingTo() 는 소수점 6자리 까지 비교 <br>
+
+- 수동 DI 를 이용하는 테스트
+```java
+public class ExRateProviderStub implements ExRateProvider{
+	private BigDecimal exRate;
+
+	public ExRateProviderStub (BigDecimal exRate) {
+		this.exRate = exRate;
+	}
+
+	public BigDecimal getExRate () {
+		return exRate;
+	}
+
+	public void setExRate (BigDecimal exRate) {
+		this.exRate = exRate;
+	}
+
+	@Override
+	public BigDecimal getExRate (String currency) throws IOException {
+		return exRate;
+	}
+
+}
+
+@Test
+@DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증한다")
+void converted_Amount() throws IOException {
+  // given
+  this.getPayment(valueOf(500), valueOf(5_000));
+  this.getPayment(valueOf(1_000), valueOf(10_000));
+  this.getPayment(valueOf(30_000), valueOf(300_000));
+}
+
+@NonNull
+private void getPayment (BigDecimal exRate, BigDecimal convertedAmount) throws IOException {
+  PaymentService paymentService = new PaymentService(new ExRateProviderStub(exRate));
+
+  // when
+  Payment payment = paymentService.prepare(1L, "USD", TEN);
+
+  // then
+  assertThat(payment.getExRate()).isEqualByComparingTo(exRate);
+  assertThat(payment.getConvertedAmount()).isEqualTo(convertedAmount);
+  assertThat(payment.getCurrency()).isEqualTo("USD");
+}
+```
+
+위 코드처럼 활용 <br>
+
+테스트용 협렵자/의존 오브젝트를 테스트 대상에 직접 주입하고 테스트 <br>
+자동화 하기 위해서는 스프링 구성정보를 이용해서 지정하고 컨테이너로부터 테스트 대상을 가져와서 테스트 한다
+- @ContextConfiguration
+- @Autowired
+
+```java
+// 변경전
+class PaymentServiceTest {
+
+	@Test
+	@DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증한다")
+	void converted_Amount () throws IOException {
+		// given
+		BeanFactory beanFactory = new AnnotationConfigApplicationContext(TestObjectFactory.class);
+		PaymentService paymentService = beanFactory.getBean(PaymentService.class);
+
+		this.getPayment(valueOf(500), valueOf(5_000));
+		this.getPayment(valueOf(1_000), valueOf(10_000));
+		this.getPayment(valueOf(30_000), valueOf(300_000));
+	}
+
+}
+
+// 변경 후 -> 스프링 구성정보를 이용한다.
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestObjectFactory.class) // 구성정보 클래스를 지정한다.
+class PaymentServiceTest {
+
+	@Autowired
+	private BeanFactory beanFactory;
+
+	@Test
+	@DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증한다")
+	void converted_Amount () throws IOException {
+		// given
+		beanFactory.getBean(PaymentService.class);
+
+		this.getPayment(valueOf(500), valueOf(5_000));
+		this.getPayment(valueOf(1_000), valueOf(10_000));
+		this.getPayment(valueOf(30_000), valueOf(300_000));
+	}
+
+}
+
+// 컨테이너 내부에 있는 Bean 을 바로 가져온다.
+class PaymentServiceTest {
+
+	@Autowired
+	private PaymentService paymentService;
+
+	@Test
+	@DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증한다")
+	void converted_Amount () throws IOException {
+		// given
+
+		this.getPayment(valueOf(500), valueOf(5_000));
+		this.getPayment(valueOf(1_000), valueOf(10_000));
+		this.getPayment(valueOf(30_000), valueOf(300_000));
+	}
+
+}
+```
+
+
+
+
 
 
 
