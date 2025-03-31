@@ -1,21 +1,23 @@
 package com.example.hellospring;
 
-import java.math.BigDecimal;
+import java.time.Clock;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.example.hellospring.exrate.impl.CachedExRateProvider;
+import com.example.hellospring.exrate.impl.WebApiExRateProvider;
 import com.example.hellospring.payment.ExRateProvider;
-import com.example.hellospring.payment.ExRateProviderStub;
 import com.example.hellospring.payment.PaymentService;
 
 @Configuration
-public class TestObjectFactory {
+public class PaymentConfig {
 
+	// Java 코드로 된 구성정보
+	// 빈 클래스, 의존관계 정의
 	@Bean
 	public PaymentService paymentService () {
-		return new PaymentService(cachedExRateProvider());
+		return new PaymentService(exRateProvider(), clock());
 	}
 
 	@Bean
@@ -25,7 +27,12 @@ public class TestObjectFactory {
 
 	@Bean
 	public ExRateProvider exRateProvider () {
-		return new ExRateProviderStub(BigDecimal.valueOf(1_000));
+		return new WebApiExRateProvider();
+	}
+
+	@Bean
+	public Clock clock() {
+		return Clock.systemDefaultZone();
 	}
 
 }

@@ -467,8 +467,44 @@ class PaymentServiceTest {
 라이브러리의 기능을 테스트 하기 위한 가이드를 제공할 때 유용하게 사용한다 <br>
 나는 알지만 팀원은 모를 수 있으니 가이드로 사용하기 좋다 <br>
 
+```java
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestPaymentConfig.class)
+public class PaymentServiceSpringTest {
 
+	@Autowired PaymentService paymentService;
+	@Autowired Clock clock;
 
+	@Test
+	void validUntil() throws IOException {
+		Payment payment = paymentService.prepare(1L, "USD", TEN);
+
+		// valid until 이 prepare() 30분 뒤로 설정됐는가?
+		LocalDateTime now = LocalDateTime.now(this.clock);
+		LocalDateTime expectedValidUntil = now.plusMinutes(30);
+
+		Assertions.assertThat(payment.getValidUntil()).isEqualTo(expectedValidUntil);
+	}
+
+	@NonNull
+	private void getPayment (BigDecimal exRate, BigDecimal convertedAmount, Clock clock) throws IOException {
+		PaymentService paymentService = new PaymentService(new ExRateProviderStub(exRate), clock);
+
+		// when
+		Payment payment = paymentService.prepare(1L, "USD", TEN);
+
+		// then
+		assertThat(payment.getExRate()).isEqualByComparingTo(exRate);
+		assertThat(payment.getConvertedAmount()).isEqualTo(convertedAmount);
+		assertThat(payment.getCurrency()).isEqualTo("USD");
+	}
+
+}
+
+```
+
+SpringBoot 테스트를 사용하면은 Spring 컨테이너와 구성정보를 가져와서 검증만 하면 된다 <br>
+훨씬 간단하게 사용할 수 있다 <br>
 
 
 
