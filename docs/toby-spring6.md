@@ -506,14 +506,44 @@ public class PaymentServiceSpringTest {
 SpringBoot 테스트를 사용하면은 Spring 컨테이너와 구성정보를 가져와서 검증만 하면 된다 <br>
 훨씬 간단하게 사용할 수 있다 <br>
 
+#### 도메인 오브젝트 테스트
+테스트의 꽃이라고 불리는 도메인 오브젝트 테스트를 알아보자 <br>
+도메인 모델 아키텍처 패턴 -> 도메인 로직, 비즌니스 로직을 어디에 둘 지를 결정하는 패턴 <br>
+1. 트랜잭션 스크립트 -> 서비스 메소드(ex-PaymentService.prepare)
+2. 도메인 모델 -> 도메인 모델 오브젝트(ex-Payment)
+
+- 생성자보다는 -> 팩토리 메소드 패턴을 이용하자
+
+```java
+// 팩토리 메소드 전 코드
+	public Payment prepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount) throws IOException {
+		BigDecimal exRate = exRateProvider.getExRate(currency);
+		BigDecimal convertedAmount = foreignCurrencyAmount.multiply(exRate);
+		LocalDateTime validUntil = LocalDateTime.now(clock).plusMinutes(30);
+
+		return new Payment(orderId, currency, foreignCurrencyAmount, exRate, convertedAmount, validUntil);
+	}
+	
+// 팩토리 메소드 적용 후 코드
+    public Payment prepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount) throws IOException {
+    BigDecimal exRate = exRateProvider.getExRate(currency);
 
 
+    return Payment.createPrepare(orderId, currency, foreignCurrencyAmount, exRate, LocalDateTime.now());
+}
 
+// 팩토리 메소드 코드
+public static Payment createPrepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount, BigDecimal exRate, LocalDateTime now) {
 
+  BigDecimal convertedAmount = foreignCurrencyAmount.multiply(exRate);
+  LocalDateTime validUntil = now.plusMinutes(30);
 
+  return new Payment(orderId, currency, foreignCurrencyAmount, exRate, convertedAmount, validUntil);
+}
 
+```
 
-
+## 템플릿
 
 
 

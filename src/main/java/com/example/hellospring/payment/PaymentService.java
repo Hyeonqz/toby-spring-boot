@@ -22,10 +22,9 @@ public class PaymentService {
 	// 재사용성 높은 코드
 	public Payment prepare(Long orderId, String currency, BigDecimal foreignCurrencyAmount) throws IOException {
 		BigDecimal exRate = exRateProvider.getExRate(currency);
-		BigDecimal convertedAmount = foreignCurrencyAmount.multiply(exRate);
-		LocalDateTime validUntil = LocalDateTime.now(clock).plusMinutes(30);
 
-		return new Payment(orderId, currency, foreignCurrencyAmount, exRate, convertedAmount, validUntil);
+
+		return Payment.createPrepare(orderId, currency, foreignCurrencyAmount, exRate, LocalDateTime.now());
 	}
 
 }
