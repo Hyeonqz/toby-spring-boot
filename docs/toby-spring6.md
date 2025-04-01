@@ -544,10 +544,22 @@ public static Payment createPrepare(Long orderId, String currency, BigDecimal fo
 ```
 
 ## 템플릿
+#### Spring 과 JDK 업그레이드
+build.gradle
+```gradle
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
 
+java {
+    sourceCompatibility = '21'
+}
+```
 
-
-
+#### 템플릿
+코드 중에서 변경이 거의 일어나지 않으며 일정한 패턴으로 유지되는 특성을 가진 부분을 자유롭게 변경되는 성질을 가진 부분으로부터 독립시켜서 효과적으로 활용할 수 있도록 하는 방법 <br>
 
 
 
