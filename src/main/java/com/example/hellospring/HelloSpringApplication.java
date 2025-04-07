@@ -1,6 +1,5 @@
 package com.example.hellospring;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -15,7 +14,7 @@ public class HelloSpringApplication {
 		SpringApplication.run(HelloSpringApplication.class, args);
 	}*/
 
-	public static void main (String[] args) throws IOException, InterruptedException {
+	public static void main (String[] args) {
 		BeanFactory beanFactory = new AnnotationConfigApplicationContext(PaymentConfig.class);
 		PaymentService paymentService = beanFactory.getBean(PaymentService.class);
 

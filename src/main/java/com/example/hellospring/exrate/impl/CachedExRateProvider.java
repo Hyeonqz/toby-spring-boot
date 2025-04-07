@@ -1,6 +1,5 @@
 package com.example.hellospring.exrate.impl;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -18,7 +17,7 @@ public class CachedExRateProvider implements ExRateProvider {
 	private LocalDateTime cacheExpiryTime;
 
 	@Override
-	public BigDecimal getExRate (String currency) throws IOException {
+	public BigDecimal getExRate (String currency) {
 		if(cachedExRate == null || cacheExpiryTime.isBefore(LocalDateTime.now())) {
 			cachedExRate = this.target.getExRate(currency);
 			cacheExpiryTime = LocalDateTime.now().plusSeconds(3);

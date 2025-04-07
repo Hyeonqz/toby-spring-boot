@@ -3,7 +3,6 @@ package com.example.hellospring.payment;
 import static java.math.BigDecimal.*;
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -26,7 +25,7 @@ public class PaymentServiceSpringTest {
 	@Autowired Clock clock;
 
 	@Test
-	void validUntil() throws IOException {
+	void validUntil() {
 		Payment payment = paymentService.prepare(1L, "USD", TEN);
 
 		LocalDateTime now = LocalDateTime.now(this.clock);
@@ -36,7 +35,7 @@ public class PaymentServiceSpringTest {
 	}
 
 	@NonNull
-	private void getPayment (BigDecimal exRate, BigDecimal convertedAmount, Clock clock) throws IOException {
+	private void getPayment (BigDecimal exRate, BigDecimal convertedAmount, Clock clock)  {
 		PaymentService paymentService = new PaymentService(new ExRateProviderStub(exRate), clock);
 
 		// when

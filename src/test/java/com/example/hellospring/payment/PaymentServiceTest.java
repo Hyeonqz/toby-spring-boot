@@ -3,7 +3,6 @@ package com.example.hellospring.payment;
 import static java.math.BigDecimal.*;
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -37,7 +36,7 @@ class PaymentServiceTest {
 
 	@Test
 	@DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증한다")
-	void convertedAmount() throws IOException {
+	void convertedAmount() {
 
 
 	    // given
@@ -49,7 +48,7 @@ class PaymentServiceTest {
 	}
 
 	@Test
-	void validUntil() throws IOException {
+	void validUntil() {
 		PaymentService paymentService1 = new PaymentService(new ExRateProviderStub(valueOf(1_000)), clock);
 
 		Payment payment = paymentService1.prepare(1L, "USD", TEN);
@@ -62,7 +61,7 @@ class PaymentServiceTest {
 	}
 
 	@NonNull
-	private void getPayment (BigDecimal exRate, BigDecimal convertedAmount, Clock clock) throws IOException {
+	private void getPayment (BigDecimal exRate, BigDecimal convertedAmount, Clock clock) {
 		PaymentService paymentService = new PaymentService(new ExRateProviderStub(exRate), clock);
 
 		// when
