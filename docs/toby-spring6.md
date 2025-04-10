@@ -561,17 +561,148 @@ java {
 #### 템플릿
 코드 중에서 변경이 거의 일어나지 않으며 일정한 패턴으로 유지되는 특성을 가진 부분을 자유롭게 변경되는 성질을 가진 부분으로부터 독립시켜서 효과적으로 활용할 수 있도록 하는 방법 <br>
 
+```java
+  public BigDecimal getExRate (String currency) {
+    // checked Exception -> unCheckedException
+    String url = "https://open.er-api.com/v6/latest/" + currency;
+
+    URI uri;
+    try {
+      uri = new URI(url);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
+    String response;
+    try {
+      HttpURLConnection urlConnection = (HttpURLConnection)uri.toURL().openConnection();
+
+      // java 가 직접 close 를 해준다 -> autoClosable -> autoClosable 구현체를 구현하고 있으면 자동으로 resource 를 닫아준다
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+        response = br.lines().collect(Collectors.joining());
+        // br.close() 위 메소드가 필요가 없어진다.
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
 
+    ExRateData exRateData;
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      exRateData = mapper.readValue(response, ExRateData.class);
 
+      return exRateData.rates().get("KRW");
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+```
 
+위 코드는 메소드에 throws Exception 을 던졌지만, try~catch 블록을 통해서 uncheckedException 으로 만들었다 <br>
+checkedException -> 컴파일 시점에 오류 체크가 됨 
+- Exception 클래스 직접 상속함
+- 서버를 실행하는 컴파일 시점에 확인됨
+- 명시적으로 try~catch, throws 선언 필수 ex) IOException
+RuntimeException -> 컴파일 시점에 오류 체크가 안됌 -> 런타임 시점에만 오류가 체킹이 됌
+- 컴파일 시점에 확인 불가
+- 명시적인 예외 처리가 안됨 ex) NullPointException
 
+#### 변하는 코드 분리하기
+- 메소드 추출 -> 템플릿의 탄생
 
+템플릿? -> 어떤 목적을 위해 미리 만들어둔 모양이 있는 틀 <br>
+템플릿 메소드 패턴도 템플릿을 사용한다 <br>
 
+템플림 메소드 패턴? <br>
+고정된 틀의 로직을 가진 템플릿 메소드를 슈퍼클래스에 두고, 바뀌는 부분을 서브클래스의 메소드에 두는 구조로 이뤄진다 <br>
 
+#### 인터페이스의 도입과 클래스 분리
+개방 폐쇄 원칙을 지키기 위해서 인터페이스를 도입한다 <br>
 
+- Callback + Method Injetion
+콜백은 실행되는 것을 목적으로 다른 오브젝틑의 메소드에 전달되는 오브젝트 파라미터로 전달되지만 값을 참조하기 위한 것이 아니라 특정 로직을 담은 메소드를 실행시키는 것이 목적 <br>
 
+템플릿/콜백은 전략 패턴의 특별한 케이스이다 <br>
+전략패턴에는 컨텍스트 및 바뀌는 알고리즘이 존재한다 <br>
 
+템플릿은 전략 패턴의 컨텍스트에 해당한다 <br>
+콜백은 전략 패턴의 전략에 해당한다 <br>
+
+템플릿/콜백은 메소드 하나만 가진 전략 인터페이스를 사용하는 전략 패턴을 의미한다 <br>
+-> 메소드 주입이라고 한다 <br>
+
+의존 오브젝트가 메소드 호출 시점에 파라미터로 전달되는 방식이다 <br>
+- 의존관계 주입의 한 종류이다 ex) DI 랑 같은 개념임
+- 메소드 호출 주입이라고도 한다
+
+```java
+	@Override
+	public BigDecimal getExRate (String currency) {
+		String url =  URL + currency;
+		
+		// 메소드 주입은 Bean 으로 작성하는게 아닌 우리가 작성하는 로직에서 작성해야 한다.
+		return this.runApiForExRate(url, new SimpleApiExecutor());
+	}
+
+	// 1. 재사용성 증가를 위해서 메소드 추출을 한다.       -> 구현체가 아닌 인터페이스를 파라미터로 사용한다.
+	private BigDecimal runApiForExRate (String url, ApiExecutor apiExecutor) {
+		URI uri;
+		try {
+			uri = new URI(url);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+
+		String response;
+		try {
+			response = apiExecutor.execute(uri); // 주입 받기
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		ExRateData exRateData;
+		try {
+			return this.extractExRate(response);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+```
+
+#### 템플릿/콜백의 작업 흐름
+```java
+public interface ApiExecutor {
+	String execute(URI uri) throws IOException;
+}
+
+@Override
+public BigDecimal getExRate (String currency) {
+  String url =  URL + currency;
+  // 메소드 주입은 Bean 으로 작성하는게 아닌 우리가 작성하는 로직에서 작성해야 한다.
+
+  return this.runApiForExRate(url, new SimpleApiExecutor(), new ErApiExRateExtractor());
+}
+```
+
+클라이언트에서는 인터페이스의 구현체를 주입시키고, 실제 메소드에서는 인터페이스로 파라미터로 만들어서 주입을 받는다 <br>
+```java
+	private BigDecimal runApiForExRate (String url, ApiExecutor apiExecutor, ExRateExtractor exRateExtractor) {
+		String response;
+		try {
+			response = apiExecutor.execute(uri); //인터페이스 메소드 호출
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		ExRateData exRateData;
+		try {
+			return exRateExtractor.extract(response); // 인터페이스 메소드 호출
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+```
 
 
 
