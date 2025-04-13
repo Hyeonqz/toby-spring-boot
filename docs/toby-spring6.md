@@ -703,13 +703,106 @@ public BigDecimal getExRate (String currency) {
 		}
 	}
 ```
+```java
+// 최종 template 을 분리하고 콜백 메소드 패턴으로 만든 로직
+public class WebApiExRateProvider implements ExRateProvider {
+	private static final String URL = "https://open.er-api.com/v6/latest/";
+	private ApiTemplate template = new ApiTemplate();
 
+	@Override
+	public BigDecimal getExRate (String currency) {
+		String url = URL + currency;
+		
+		return template.getExRate(url, new HttpClientApiExecutor(), new ErApiExRateExtractor());
+	}
 
+}
 
+```
 
+#### Spring 에서 제공하는 템플릿 & 콜백 패턴 클래스
+```java
+// 디폴트 콜백 패턴
+@Slf4j
+@Component
+public class WebApiExRateProvider implements ExRateProvider {
+  private static final String URL = "https://open.er-api.com/v6/latest/";
+  private ApiTemplate template = new ApiTemplate();
 
+  @Override
+  public BigDecimal getExRate (String currency) {
+    String url = URL + currency;
 
+    return template.getForExRate(url);
+  }
 
+}
+
+public class ApiTemplate {
+  private final ApiExecutor apiExecutor;
+  private final ExRateExtractor exRateExtractor;
+
+  public ApiTemplate () {
+    this.apiExecutor = new HttpClientApiExecutor();
+    this.exRateExtractor = new ErApiExRateExtractor();
+  }
+
+  public BigDecimal getForExRate(String url) {
+    return this.getExRate(url, this.apiExecutor, this.exRateExtractor);
+  }
+
+  // 1. 재사용성 증가를 위해서 메소드 추출을 한다.
+  public BigDecimal getExRate (String url, ApiExecutor apiExecutor, ExRateExtractor exRateExtractor) {
+    URI uri;
+    try {
+      uri = new URI(url);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
+    String response;
+    try {
+      response = apiExecutor.execute(uri);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    ExRateData exRateData;
+    try {
+      return exRateExtractor.extract(response);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}
+
+```
+
+```java
+// 템플릿 콜백 메서드 -> 생성 자 사용
+	public ApiTemplate () {
+		this.apiExecutor = new HttpClientApiExecutor();
+		this.exRateExtractor = new ErApiExRateExtractor();
+	}
+
+	public ApiTemplate (ApiExecutor apiExecutor, ExRateExtractor exRateExtractor) {
+		this.apiExecutor = new HttpClientApiExecutor();
+		this.exRateExtractor = new ErApiExRateExtractor();
+	}
+```
+
+Spring 이 제공하는 템플릿 예시
+- RestTemplate -> api 관련 template 콜백 메소드 예시로 좋음
+- JdbcTemplate
+- JmsTemplate   
+- TransactionTemplate
+- HibernateTemplate
+
+등등 여러가지가 있다 <br>
+
+RestTemplate 처럼 만들어보자 이제 <br>
+- HTTP Client 라이브러리 확장: ClientHttpRequestFactory
+- Message Body 를 변환하는 전략: HttpMessageConverter
 
 
 
