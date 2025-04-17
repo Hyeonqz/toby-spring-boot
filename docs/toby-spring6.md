@@ -805,7 +805,115 @@ RestTemplate 처럼 만들어보자 이제 <br>
 - Message Body 를 변환하는 전략: HttpMessageConverter
 
 
+<br>
 
+## 예외
+- 예외는 정상적인 프로그램 흐름을 방해하는 사건
+- 예외적인 상황에서만 사용
+- 많은 경우 예외는 프로그램 오류, 버그 때문에 발생
+
+#### 예외가 발생하면?
+- 예외 상황을 복구해서 정상적인 흐름으로 전환할 수 있는가?
+  - 방법1: 재시도
+  - 방법2: 다른 대안을 찾는다.
+- 버그인가?
+  - 우리 코드의 오류 때문에 버그가 발생할 수 있다.
+  - 예외가 발생한 코드의 버그인가?
+  - 클라이언트의 버그인가?
+- 제어할 수 없는 예외상황인가?
+  - ex) 네트워크 장애, db 장애
+
+#### 예외를 잘못 다루는 코드
+- 예외를 무시하는 코드
+```java
+// 1번: 예외에 아무것도 없는 코드
+try {
+	
+} catch (Exception e) {
+	
+}
+
+// 2번: 예외를 처리하지 않고 로그만 찍는 것.
+try {
+
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+
+위 2가지는 완벽한 안티패턴이다. 실무에서는 위처럼 코드를 작성하면 안된다. <br>
+
+- 무의미하고 무책임한 throws
+```java
+public void method1() throws Exception {
+	method2();
+}
+
+public void method2() throws Exception {
+  method3();
+}
+
+public void method3() throws Exception {
+  // Exception 이 필요한 예외 로직
+}
+```
+
+무분별하게 메소드에 던지는 Exception 은 다른 로직에 영향을 끼칠 때 불필요하게 Exception 을 던지게 된다 <br>
+
+예외의 종류
+- Error -> 시스템에 비정상적인 상황 ex) OutOfMemoryError, ThreadDeath
+- Exception -> Checked: 컴파일시 에러가 잡힌다.
+- RuntimeException -> Unchecked: 컴파일시 에러가 안잡힌다 -> 실행 중에 무언가 동작할 때 잡힌다.
+
+#### Checked Exception
+Exception 인터페이스를 상속해서 만들어진 Exception 중에서 RuntimeException 을 상속하지 않은 예외들을 의미한다.
+- catch 나 throws 를 강요
+- 예외 발생시 컴파일이 불가능함 -> 실행을 할 수 없음
+- 초기 라이브러리의 잘못된 예외 설계/사용
+- 예외를 복구할 수 없다면 RuntimeException 이나 적절한 추상화 레벨의 예외로 전환해서 던질 것
+
+#### 예외의 추상화와 전환
+- 사용 기술에 따라 같은 문제에 대해 다른 종류의 예외 발생
+- 적절한 예외 추상화와 예외 번역이 필요
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 서비스 추상화
 
 
 
