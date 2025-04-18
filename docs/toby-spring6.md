@@ -876,13 +876,12 @@ Exception 인터페이스를 상속해서 만들어진 Exception 중에서 Runti
 - 사용 기술에 따라 같은 문제에 대해 다른 종류의 예외 발생
 - 적절한 예외 추상화와 예외 번역이 필요
 
+#### JPA Repository(Application InfraStructure Bean)
+DataSource 는 컨테이너안에 딱 1개만 존재하면 된다면 Spring Bean 으로 등록하여 싱글톤으로 사용하면 된다 <br>
+하지만 Order 같은 사용자가 여러명인 것은 Bean 으로 등록하면 안되고 매번 호출해서 사용해야 한다 <br>
 
-
-
-
-
-
-
+JPA 의 EntityManger 또한 요청마다 매번 새로 생성이 되야한다 <br>
+그리고 EntityManger 를 만들기 위해서는 EntityMangerFactory 에서 EntityManger 를 계속 찍어내야 한다 <br>
 
 
 
