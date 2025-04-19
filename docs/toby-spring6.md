@@ -883,8 +883,11 @@ DataSource 는 컨테이너안에 딱 1개만 존재하면 된다면 Spring Bean
 JPA 의 EntityManger 또한 요청마다 매번 새로 생성이 되야한다 <br>
 그리고 EntityManger 를 만들기 위해서는 EntityMangerFactory 에서 EntityManger 를 계속 찍어내야 한다 <br>
 
+#### Spring Data Access Exception
+JDBC SQLException 은 jdbc 를 기반으로 하는 모든 기술에서 발생하는 예외이다 <br>
 
-
+DataAccessException -> Spring 이 정의한 db 의 에러코드와 데이터 엑세스 기술에 독립적인 예외 구조 <br>
+적절한 예외 번역 도구를 제공한다 <br>
 
 
 

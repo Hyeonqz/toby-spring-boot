@@ -4,33 +4,34 @@ import java.math.BigDecimal;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.example.hellospring.config.DataConfig;
+import com.example.hellospring.data.OrderRepository;
 import com.example.hellospring.order.Order;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-
+@Component
 public class DataClient {
 	public static void main (String[] args) {
 		BeanFactory beanFactory = new AnnotationConfigApplicationContext(DataConfig.class);
-		EntityManagerFactory emf = beanFactory.getBean(EntityManagerFactory.class);
+		OrderRepository orderRepository = beanFactory.getBean(OrderRepository.class);
+		JpaTransactionManager transactionManager = beanFactory.getBean(JpaTransactionManager.class);
 
-		// em 생성
-		EntityManager em =  emf.createEntityManager();
-		// transaction 생성
-		em.getTransaction().begin();
+		try {
+			new TransactionTemplate(transactionManager).execute(status -> {
+				orderRepository.save(new Order("1000", BigDecimal.TEN));
+				orderRepository.save(new Order("1000", BigDecimal.TEN));
 
-		// em.persist() -> 영속화 해달라 -> 영속성 컨텍스트로 들어감
-		Order order = new Order("100", BigDecimal.valueOf(1000));
-		em.persist(order);
+				return null;
+				}
+			);
+		} catch (DataIntegrityViolationException e) {
+			System.out.println("주문번호 중복 복구 작업");
+		}
 
-		System.out.println(order);
-
-		// 실제 db 에 commit
-		em.getTransaction().commit();
-		System.out.println(order);
-		// em close
-		em.close();
 	}
+
 }
